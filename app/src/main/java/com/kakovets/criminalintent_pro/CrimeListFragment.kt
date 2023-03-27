@@ -1,5 +1,7 @@
 package com.kakovets.criminalintent_pro
 
+import android.icu.text.DateFormat
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -64,8 +66,13 @@ class CrimeListFragment: Fragment() {
 
         fun bind(crime: Crime) {
             this.crime = crime
+            val formattedDate = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                DateFormat.getPatternInstance("EEEE, MMM dd, yyyy").format(crime.date)
+            } else {
+                crime.date.toString()
+            }
             titleTextView.text = this.crime.title
-            dateTextView.text = this.crime.date.toString()
+            dateTextView.text = formattedDate
 //            For some reason in the case of fast scrolling all imageViews become invisible.
 //            Maybe because of reusing holders.
 //            if (!crime.isSolved) crimeSolvedImageView.isVisible = false
