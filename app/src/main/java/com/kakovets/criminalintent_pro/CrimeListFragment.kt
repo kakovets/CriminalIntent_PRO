@@ -13,8 +13,11 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.kakovets.criminalintent_pro.CrimeListViewModel
 
 private const val TAG = "CrimeListFragment"
+private const val TYPE_SIMPLE= 0
+private const val TYPE_POLICE= 1
 
 class CrimeListFragment: Fragment() {
 
@@ -74,13 +77,24 @@ class CrimeListFragment: Fragment() {
     private inner class CrimeAdapter(var crimes: List<Crime>): RecyclerView.Adapter<CrimeHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CrimeHolder {
-            val view = layoutInflater.inflate(R.layout.list_item_crime, parent, false)
+            val view = when (viewType) {
+                TYPE_SIMPLE -> layoutInflater.inflate(R.layout.list_item_crime, parent, false)
+                TYPE_POLICE -> layoutInflater.inflate(R.layout.list_item_crime_police, parent, false)
+                else -> throw IllegalArgumentException("Invalid view type")
+            }
             return CrimeHolder(view)
         }
 
         override fun onBindViewHolder(holder: CrimeHolder, position: Int) {
             val crime = crimes[position]
             holder.bind(crime)
+        }
+
+        override fun getItemViewType(position: Int): Int {
+            return  when(crimes[position].requiresPolice) {
+                true -> TYPE_POLICE
+                false -> TYPE_SIMPLE
+            }
         }
 
         override fun getItemCount() = crimes.size
