@@ -2,9 +2,10 @@ package com.kakovets.criminalintent_pro
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.kakovets.criminalintent_pro.CrimeListFragment
+import java.util.*
 
-class MainActivity : AppCompatActivity() {
+private const val TAG = "MainActivity"
+class MainActivity : AppCompatActivity(), CrimeListFragment.Callbacks {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,5 +19,15 @@ class MainActivity : AppCompatActivity() {
                 .add(R.id.fragment_container, fragment)
                 .commit()
         }
+    }
+
+    override fun onCrimeSelected(crimeID: UUID) {
+//        Log.d(TAG, "MainActivity.onCrimeSelected: $crimeID")
+        val fragment = CrimeFragment.newInstance(crimeID)
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 }
