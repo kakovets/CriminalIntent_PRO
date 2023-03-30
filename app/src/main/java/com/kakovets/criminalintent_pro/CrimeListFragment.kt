@@ -12,7 +12,9 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import java.util.UUID
@@ -27,7 +29,7 @@ class CrimeListFragment: Fragment() {
 
     private var callbacks: Callbacks? = null
     private lateinit var crimeRecyclerView: RecyclerView
-    private var adapter: CrimeAdapter? = CrimeAdapter(emptyList())
+    private var adapter: CrimeAdapter? = CrimeAdapter()
     private val crimeListViewModel: CrimeListViewModel by lazy {
         ViewModelProvider (this)[CrimeListViewModel::class.java]
     }
@@ -68,7 +70,9 @@ class CrimeListFragment: Fragment() {
     }
 
     private fun  updateUI(crimes: List<Crime>) {
-        adapter = CrimeAdapter(crimes)
+        adapter = CrimeAdapter().apply {
+            submitList(crimes)
+        }
         crimeRecyclerView.adapter = adapter
     }
 
@@ -102,7 +106,7 @@ class CrimeListFragment: Fragment() {
         }
     }
 
-    private inner class CrimeAdapter(var crimes: List<Crime>): RecyclerView.Adapter<CrimeHolder>() {
+    private inner class CrimeAdapter: ListAdapter<Crime, CrimeHolder>(CrimeCallback) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CrimeHolder {
             val view = layoutInflater.inflate(R.layout.list_item_crime, parent, false)
@@ -110,11 +114,16 @@ class CrimeListFragment: Fragment() {
         }
 
         override fun onBindViewHolder(holder: CrimeHolder, position: Int) {
-            val crime = crimes[position]
+            val crime = getItem(position)
             holder.bind(crime)
         }
+    }
 
-        override fun getItemCount() = crimes.size
+    object CrimeCallback: DiffUtil.ItemCallback<Crime>() {
+
+        override fun areItemsTheSame(oldItem: Crime, newItem: Crime) = oldItem.id == newItem.id
+
+        override fun areContentsTheSame(oldItem: Crime, newItem: Crime) = oldItem == newItem
     }
 
     companion object {
