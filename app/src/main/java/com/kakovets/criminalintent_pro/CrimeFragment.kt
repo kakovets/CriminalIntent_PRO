@@ -19,12 +19,14 @@ import java.util.*
 private const val TAG = "CrimeFragment"
 private const val ARG_CRIME_ID = "crime_id"
 private const val DIALOG_DATE = "DialogDate"
+private const val DIALOG_TIME = "DialogTime"
 
 class CrimeFragment: Fragment(){
 
     private lateinit var crime: Crime
     private lateinit var titleField: EditText
     private lateinit var dateButton: Button
+    private lateinit var timeButton: Button
     private lateinit var solvedCheckBox: CheckBox
     private val crimeDetailViewModel: CrimeDetailViewModel by lazy {
         ViewModelProvider(this)[CrimeDetailViewModel::class.java]
@@ -44,6 +46,11 @@ class CrimeFragment: Fragment(){
             crime.date = receivedDate
             updateUI()
         }
+        setFragmentResultListener("request") { _, bundle ->
+            val receivedDate = bundle.getSerializable("bundle") as Date
+            crime.date.time = receivedDate.time
+            updateUI()
+        }
     }
 
     override fun onCreateView(
@@ -54,6 +61,7 @@ class CrimeFragment: Fragment(){
         val view = inflater.inflate(R.layout.fragment_crime, container, false)
         titleField = view.findViewById(R.id.editText_crime_title)
         dateButton = view.findViewById(R.id.button_crime)
+        timeButton = view.findViewById(R.id.button_time)
         solvedCheckBox = view.findViewById(R.id.checkBox_crime)
 
         return view
@@ -99,6 +107,12 @@ class CrimeFragment: Fragment(){
         dateButton.setOnClickListener {
             DatePickerFragment.newInstance(crime.date).apply {
                 show(this@CrimeFragment.parentFragmentManager, DIALOG_DATE)
+            }
+        }
+
+        timeButton.setOnClickListener {
+            TimePickerFragment.newInstance(crime.date).apply {
+                show(this@CrimeFragment.parentFragmentManager, DIALOG_TIME)
             }
         }
     }
