@@ -6,5 +6,11 @@
         android:icon="@drawable/ic_menu_add"
         android:title="@string/new_crime"
         app:showAsAction="ifRoom|withText" />
+    <item
+        android:id="@+id/drop_database"
+        android:icon="@drawable/ic_menu_drop"
+        android:title="@string/drop_all"
+        app:showAsAction="never" />
+
 
 </menu>

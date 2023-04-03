@@ -24,6 +24,8 @@ class CrimeRepository private constructor(context: Context){
 
     fun getCrimes(): LiveData<List<Crime>> = crimeDao.getCrimes()
 
+    fun dropDatabase() = executor.execute { crimeDao.dropDatabase() }
+
     fun updateCrime(crime: Crime) = executor.execute { crimeDao.updateCrime(crime) }
 
     fun addCrime(crime: Crime) = executor.execute { crimeDao.addCrime(crime) }
