@@ -1,8 +1,11 @@
 package com.kakovets.criminalintent_pro
 
+import android.content.Intent
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.text.Editable
 import android.text.TextWatcher
+import android.text.format.DateFormat
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +13,8 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.Observer
@@ -20,6 +25,7 @@ private const val TAG = "CrimeFragment"
 private const val ARG_CRIME_ID = "crime_id"
 private const val DIALOG_DATE = "DialogDate"
 private const val DIALOG_TIME = "DialogTime"
+private const val DATE_FORMAT = "EEE, MMM, dd"
 
 class CrimeFragment: Fragment(){
 
@@ -28,8 +34,26 @@ class CrimeFragment: Fragment(){
     private lateinit var dateButton: Button
     private lateinit var timeButton: Button
     private lateinit var solvedCheckBox: CheckBox
+    private lateinit var chooseSuspectButton: Button
+    private lateinit var sendReportButton: Button
     private val crimeDetailViewModel: CrimeDetailViewModel by lazy {
         ViewModelProvider(this)[CrimeDetailViewModel::class.java]
+    }
+
+    private val launcher = registerForActivityResult(ActivityResultContracts.PickContact()) { result ->
+        if (result != null) {
+            val queryFields = arrayOf(ContactsContract.Contacts.DISPLAY_NAME)
+            val cursor = requireActivity().contentResolver.query(result, queryFields, null, null, null)
+            cursor?.use {
+                if (it.count != 0) {
+                    it.moveToFirst()
+                    val suspect = it.getString(0)
+                    crime.suspect = suspect
+                    crimeDetailViewModel.saveCrime(crime)
+                    chooseSuspectButton.text = suspect
+                }
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,7 +87,8 @@ class CrimeFragment: Fragment(){
         dateButton = view.findViewById(R.id.button_crime)
         timeButton = view.findViewById(R.id.button_time)
         solvedCheckBox = view.findViewById(R.id.checkBox_crime)
-
+        chooseSuspectButton = view.findViewById(R.id.button_choose_suspect)
+        sendReportButton = view.findViewById(R.id.button_send_report)
         return view
     }
 
@@ -115,6 +140,21 @@ class CrimeFragment: Fragment(){
                 show(this@CrimeFragment.parentFragmentManager, DIALOG_TIME)
             }
         }
+
+        chooseSuspectButton.setOnClickListener {
+            launcher.launch()
+        }
+
+        sendReportButton.setOnClickListener {
+            Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, getCrimeReport())
+                putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject))
+            }.also { intent ->
+                val chooserIntent = Intent.createChooser(intent, getString(R.string.send_report))
+                startActivity(chooserIntent)
+            }
+        }
     }
 
     override fun onStop() {
@@ -129,6 +169,24 @@ class CrimeFragment: Fragment(){
             isChecked = crime.isSolved
             jumpDrawablesToCurrentState()
         }
+        if (crime.suspect.isNotBlank()) {
+            chooseSuspectButton.text = crime.suspect
+        }
+    }
+
+    private fun getCrimeReport(): String {
+        val solvedString = if (crime.isSolved) {
+            getString(R.string.crime_report_solved)
+        } else {
+            getString(R.string.crime_report_unsolved)
+        }
+        val dateString = DateFormat.format(DATE_FORMAT, crime.date).toString()
+        val suspect = if (crime.suspect.isBlank()) {
+            getString(R.string.crime_report_no_suspect)
+        } else {
+            getString(R.string.crime_report_suspect, crime.suspect)
+        }
+        return getString(R.string.crime_report, crime.title, dateString, solvedString, suspect)
     }
 
     companion object {
