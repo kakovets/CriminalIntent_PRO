@@ -10,7 +10,8 @@
     <string name="new_crime">New Crime</string>
     <string name="drop_all">Drop all</string>
     <string name="crime_suspect_text">Choose suspect</string>
-    <string name="crime_report_text">Send crime report</string>
+    <string name="crime_report_text">Send report</string>
+    <string name="crime_report_call">Call</string>
     <string name="crime_report">%s!
         The crime was discovered on %s. %s and %s</string>
     <string name="crime_report_solved">The case is solved</string>

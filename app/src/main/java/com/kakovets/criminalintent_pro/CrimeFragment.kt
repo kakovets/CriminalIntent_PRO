@@ -1,6 +1,9 @@
 package com.kakovets.criminalintent_pro
 
+import android.Manifest.permission.READ_CONTACTS
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.text.Editable
@@ -15,6 +18,8 @@ import android.widget.CheckBox
 import android.widget.EditText
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.Observer
@@ -36,11 +41,12 @@ class CrimeFragment: Fragment(){
     private lateinit var solvedCheckBox: CheckBox
     private lateinit var chooseSuspectButton: Button
     private lateinit var sendReportButton: Button
+    private lateinit var callButton: Button
     private val crimeDetailViewModel: CrimeDetailViewModel by lazy {
         ViewModelProvider(this)[CrimeDetailViewModel::class.java]
     }
 
-    private val launcher = registerForActivityResult(ActivityResultContracts.PickContact()) { result ->
+    private val launcherSend = registerForActivityResult(ActivityResultContracts.PickContact()) { result ->
         if (result != null) {
             val queryFields = arrayOf(ContactsContract.Contacts.DISPLAY_NAME)
             val cursor = requireActivity().contentResolver.query(result, queryFields, null, null, null)
@@ -89,6 +95,7 @@ class CrimeFragment: Fragment(){
         solvedCheckBox = view.findViewById(R.id.checkBox_crime)
         chooseSuspectButton = view.findViewById(R.id.button_choose_suspect)
         sendReportButton = view.findViewById(R.id.button_send_report)
+        callButton = view.findViewById(R.id.button_call)
         return view
     }
 
@@ -142,7 +149,7 @@ class CrimeFragment: Fragment(){
         }
 
         chooseSuspectButton.setOnClickListener {
-            launcher.launch()
+            launcherSend.launch()
         }
 
         sendReportButton.setOnClickListener {
@@ -155,6 +162,40 @@ class CrimeFragment: Fragment(){
                 startActivity(chooserIntent)
             }
         }
+
+        callButton.setOnClickListener {
+            if (ContextCompat.checkSelfPermission(requireActivity(), READ_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(requireActivity(), arrayOf(READ_CONTACTS), 0)
+            } else {
+                val number = getNumber()
+                val numUri: Uri = Uri.parse("tel:$number")
+                val intent = Intent(Intent.ACTION_DIAL, numUri)
+                startActivity(intent)
+            }
+        }
+    }
+
+    private fun getNumber(): String {
+        val phoneContract = ContactsContract.CommonDataKinds.Phone.NUMBER
+        val queryFields = arrayOf(phoneContract)
+        val selection = "${ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY} = ?"
+        val selectionArgs = arrayOf(crime.suspect)
+        val cursor = requireActivity().contentResolver.query(
+            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+            queryFields,
+            selection,
+            selectionArgs,
+            null)
+        var number = ""
+        cursor?.use {
+            if (it.count != 0) {
+                it.moveToFirst()
+                val numIndex = it.getColumnIndex(phoneContract)
+                number = it.getString(numIndex)
+            }
+        }
+        return number
     }
 
     override fun onStop() {
