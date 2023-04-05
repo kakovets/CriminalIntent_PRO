@@ -33,6 +33,7 @@ private const val TAG = "CrimeFragment"
 private const val ARG_CRIME_ID = "crime_id"
 private const val DIALOG_DATE = "DialogDate"
 private const val DIALOG_TIME = "DialogTime"
+private const val DIALOG_PHOTO = "DialogPhoto"
 private const val DATE_FORMAT = "EEE, MMM, dd"
 
 class CrimeFragment: Fragment(){
@@ -147,6 +148,11 @@ class CrimeFragment: Fragment(){
         }
 
         titleField.addTextChangedListener(titleWatcher)
+
+        photoView.setOnClickListener {
+            val k = FullPhotoFragment.newInstance(photoFile)
+            k.show(parentFragmentManager, DIALOG_PHOTO)
+        }
 
         photoButton.apply {
             val packageManager: PackageManager = requireActivity().packageManager
@@ -267,7 +273,9 @@ class CrimeFragment: Fragment(){
             matrix.postRotate(90f)
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
             photoView.setImageBitmap(bitmap)
+            photoView.isClickable = true
         } else {
+            photoView.isClickable = false
             photoView.setImageDrawable(null)
         }
     }
