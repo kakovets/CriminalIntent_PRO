@@ -10,6 +10,7 @@ import android.view.View.OnClickListener
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -18,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import java.text.SimpleDateFormat
 import java.util.*
 
 private const val TAG = "CrimeListFragment"
@@ -129,6 +131,7 @@ class CrimeListFragment: Fragment() {
         private val titleTextView: TextView = itemView.findViewById(R.id.crime_title)
         private val dateTextView: TextView = itemView.findViewById(R.id.crime_date)
         private val crimeSolvedImageView: ImageView = itemView.findViewById(R.id.imageView_crime_solved)
+        private val listItemCrime: ConstraintLayout = itemView.findViewById(R.id.linearLayout)
 
         init {
             itemView.setOnClickListener(this)
@@ -151,6 +154,14 @@ class CrimeListFragment: Fragment() {
             } else {
                 View.GONE
             }
+            val solved = if (crime.isSolved) {
+                "is solved"
+            } else {
+                "is not solved"
+            }
+            val dateFormat = SimpleDateFormat("EEEE d MMMM yyyy, H:m", Locale.getDefault())
+            val formattedDate = dateFormat.format(crime.date)
+            listItemCrime.contentDescription = getString(R.string.crime_item_description, crime.title, formattedDate, solved)
         }
 
         override fun onClick(v: View?) {
