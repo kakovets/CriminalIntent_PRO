@@ -11,7 +11,9 @@ import android.provider.ContactsContract
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
+import android.icu.text.DateFormat as IcuDateFormat
 import android.text.format.DateFormat
+import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -255,7 +257,15 @@ class CrimeFragment: Fragment(){
 
     private fun updateUI() {
         titleField.setText(crime.title)
-        dateButton.text = crime.date.toString()
+
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
+            val df = IcuDateFormat.getDateInstance(IcuDateFormat.DEFAULT, Locale.getDefault())
+            val formattedDate = df.format(crime.date)
+            dateButton.text = formattedDate
+        } else {
+            dateButton.text = crime.date.toString()
+        }
+
         solvedCheckBox.apply {
             isChecked = crime.isSolved
             jumpDrawablesToCurrentState()
@@ -286,7 +296,12 @@ class CrimeFragment: Fragment(){
         } else {
             getString(R.string.crime_report_unsolved)
         }
-        val dateString = DateFormat.format(DATE_FORMAT, crime.date).toString()
+        val dateString = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
+            val df = IcuDateFormat.getDateInstance(IcuDateFormat.SHORT, Locale.getDefault())
+            df.format(crime.date)
+        } else {
+            DateFormat.format(DATE_FORMAT, crime.date).toString()
+        }
         val suspect = if (crime.suspect.isBlank()) {
             getString(R.string.crime_report_no_suspect)
         } else {

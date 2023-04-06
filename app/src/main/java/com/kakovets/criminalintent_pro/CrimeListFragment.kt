@@ -1,6 +1,8 @@
 package com.kakovets.criminalintent_pro
 
 import android.content.Context
+import android.icu.text.DateFormat as IcuDateFormat
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -16,7 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import java.util.UUID
+import java.util.*
 
 private const val TAG = "CrimeListFragment"
 
@@ -135,7 +137,12 @@ class CrimeListFragment: Fragment() {
         fun bind(crime: Crime) {
             this.crime = crime
             titleTextView.text = this.crime.title
-            dateTextView.text = this.crime.date.toString()
+            dateTextView.text = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
+                val df = IcuDateFormat.getDateInstance(IcuDateFormat.LONG, Locale.getDefault())
+                df.format(crime.date)
+            } else {
+                this.crime.date.toString()
+            }
 //            For some reason in the case of fast scrolling all imageViews become invisible.
 //            Maybe because of reusing holders.
 //            if (!crime.isSolved) crimeSolvedImageView.isVisible = false
