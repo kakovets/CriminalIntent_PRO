@@ -21,4 +21,7 @@
     <string name="crime_report_suspect">подозреваемый это %s.</string>
     <string name="crime_report_subject">Отчет CriminalIntent</string>
     <string name="send_report">Отправить отчет через</string>
+    <string name="crime_photo_button_description">Сделать фото преступления</string>
+    <string name="crime_photo_no_image_description">Фото места преступления (не установлено)</string>
+    <string name="crime_photo_image_description">Фото места преступления (установлено)</string>
 </resources>

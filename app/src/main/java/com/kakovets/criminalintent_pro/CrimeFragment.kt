@@ -284,9 +284,13 @@ class CrimeFragment: Fragment(){
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
             photoView.setImageBitmap(bitmap)
             photoView.isClickable = true
+            photoView.contentDescription =
+                getString(R.string.crime_photo_image_description)
         } else {
             photoView.isClickable = false
             photoView.setImageDrawable(null)
+            photoView.contentDescription =
+                getString(R.string.crime_photo_no_image_description)
         }
     }
 
